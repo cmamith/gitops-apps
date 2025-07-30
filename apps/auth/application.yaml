@@ -1,0 +1,38 @@
+# gitops-apps/app-of-apps/application.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: app-of-apps
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/cmamith/gitops-apps.git
+    targetRevision: HEAD
+    path: apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  sources:
+    - path: apps/auth
+      repoURL: https://github.com/cmamith/eks-3tier-app.git
+      targetRevision: HEAD
+      helm:
+        valueFiles:
+          - /Users/amithcm/Desktop/gitops-apps/apps/auth/values.yaml
+    - path: apps/profile
+      repoURL: https://github.com/cmamith/eks-3tier-app.git
+      targetRevision: HEAD
+      helm:
+        valueFiles:
+          - /Users/amithcm/Desktop/gitops-apps/apps/profile/values.yaml
+    - path: apps/frontend
+      repoURL: https://github.com/cmamith/eks-3tier-app.git
+      targetRevision: HEAD
+      helm:
+        valueFiles:
+          - /Users/amithcm/Desktop/gitops-apps/apps/frontend/values.yaml
