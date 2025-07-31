@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: auth-app
+  name: profile-app
   namespace: argocd
 spec:
   project: default
