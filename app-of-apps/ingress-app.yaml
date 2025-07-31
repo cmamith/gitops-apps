@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/cmamith/eks-3tier-app.git
+    repoURL: https://github.com/cmamith/gitops-apps.git
     targetRevision: HEAD
     path: ingress
   destination:
