@@ -1,20 +1,18 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app-of-apps
+  name: ingress-app
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/cmamith/gitops-apps.git
+    repoURL: https://github.com/cmamith/eks-3tier-app.git
     targetRevision: HEAD
-    path: apps
-    directory:
-      recurse: true
+    path: ingress
   destination:
     server: https://kubernetes.default.svc
     namespace: default
   syncPolicy:
     automated:
-      prune: true
       selfHeal: true
+      prune: true
