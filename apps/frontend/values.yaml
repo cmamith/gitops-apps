@@ -1,3 +1,20 @@
-replicaCount: 2
+replicaCount: 4
+
 image:
-  tag: v8
+  repository: 177206615793.dkr.ecr.ap-southeast-1.amazonaws.com/frontend-app
+  tag: v9
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
