@@ -2,7 +2,7 @@ replicaCount: 4
 
 image:
   repository: 177206615793.dkr.ecr.ap-southeast-1.amazonaws.com/frontend-app
-  tag: ${GITHUB_REF_NAME}
+  tag: tag: v13
   pullPolicy: Always
 
 service:
