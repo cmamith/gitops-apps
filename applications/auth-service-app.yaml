@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-service-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/camith/gitops-repo       # <-- Replace with your actual repo!
+    targetRevision: main
+    path: apps/auth                                   # <-- Path to the chart in GitOps repo
+    helm:
+      valueFiles:
+        - values.yaml                                      # <-- Uses the values.yaml in the chart directory
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default                                     # <-- Namespace to deploy in your cluster
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
