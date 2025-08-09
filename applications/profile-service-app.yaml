@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/camith/gitops-repo       # <-- Replace with your actual repo!
+    repoURL: https://github.com/cmamith/gitops-apps      # <-- Replace with your actual repo!
     targetRevision: main
     path: apps/profile                                   # <-- Path to the chart in GitOps repo
     helm:
