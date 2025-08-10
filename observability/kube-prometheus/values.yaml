@@ -1,0 +1,41 @@
+crds:
+  create: true
+
+namespaceOverride: observability
+
+prometheus:
+  prometheusSpec:
+    scrapeInterval: 30s
+    retention: 15d
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+
+kube-state-metrics:
+  enabled: true
+nodeExporter:
+  enabled: true
+
+grafana:
+  admin:
+    existingSecret: grafana-admin
+    userKey: admin-user
+    passwordKey: admin-password
+  service:
+    type: ClusterIP
+    port: 80
+  defaultDashboardsEnabled: true
+  sidecar:
+    dashboards:
+      enabled: true
+    datasources:
+      enabled: true
+
+alertmanager:
+  enabled: true
