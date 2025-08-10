@@ -1,4 +1,3 @@
----
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
 metadata:
@@ -7,16 +6,15 @@ metadata:
 spec:
   refreshInterval: 1h
   secretStoreRef:
-    # This must match the ClusterSecretStore you already have in eks-3tier-app
     kind: ClusterSecretStore
-    name: aws-secrets
+    name: aws-secrets-manager     # <-- match your actual store name
   target:
     name: grafana-admin
     creationPolicy: Owner
   data:
     - secretKey: admin-user
       remoteRef:
-        key: grafana/admin              # AWS Secrets Manager secret name
+        key: grafana/admin        # AWS Secrets Manager secret name
         property: adminUser
     - secretKey: admin-password
       remoteRef:
