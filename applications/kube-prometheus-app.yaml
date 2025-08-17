@@ -34,6 +34,9 @@ spec:
               podMonitorSelectorNilUsesHelmValues: false
           kube-state-metrics:
             enabled: true
+            replicaCount: 1
+            autoscaling:
+              enabled: false
           nodeExporter:
             enabled: true
           grafana:
