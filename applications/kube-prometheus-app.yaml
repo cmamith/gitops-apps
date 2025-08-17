@@ -1,43 +1,58 @@
-sources:
-  - repoURL: https://prometheus-community.github.io/helm-charts
-    chart: kube-prometheus-stack
-    targetRevision: "65.0.0"
-    helm:
-      values: |
-        crds:
-          create: true
-        namespaceOverride: observability
-        prometheus:
-          prometheusSpec:
-            scrapeInterval: 30s
-            retention: 15d
-            storageSpec:
-              volumeClaimTemplate:
-                spec:
-                  accessModes: ["ReadWriteOnce"]
-                  resources:
-                    requests:
-                      storage: 20Gi
-            serviceMonitorSelectorNilUsesHelmValues: false
-            podMonitorSelectorNilUsesHelmValues: false
-        kube-state-metrics:
-          enabled: true
-        nodeExporter:
-          enabled: true
-        grafana:
-          admin:
-            existingSecret: grafana-admin
-            userKey: admin-user
-            passwordKey: admin-password
-          service:
-            type: ClusterIP
-            port: 80
-          defaultDashboardsEnabled: true
-          sidecar:
-            dashboards:
-              enabled: true
-            datasources:
-              enabled: true
-        alertmanager:
-          enabled: true
-
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kube-prometheus
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: observability
+  sources:
+    - repoURL: https://prometheus-community.github.io/helm-charts
+      chart: kube-prometheus-stack
+      targetRevision: "65.0.0"
+      helm:
+        values: |
+          crds:
+            create: true
+          namespaceOverride: observability
+          prometheus:
+            prometheusSpec:
+              scrapeInterval: 30s
+              retention: 15d
+              storageSpec:
+                volumeClaimTemplate:
+                  spec:
+                    accessModes: ["ReadWriteOnce"]
+                    resources:
+                      requests:
+                        storage: 20Gi
+              serviceMonitorSelectorNilUsesHelmValues: false
+              podMonitorSelectorNilUsesHelmValues: false
+          kube-state-metrics:
+            enabled: true
+          nodeExporter:
+            enabled: true
+          grafana:
+            admin:
+              existingSecret: grafana-admin
+              userKey: admin-user
+              passwordKey: admin-password
+            service:
+              type: ClusterIP
+              port: 80
+            defaultDashboardsEnabled: true
+            sidecar:
+              dashboards:
+                enabled: true
+              datasources:
+                enabled: true
+          alertmanager:
+            enabled: true
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
