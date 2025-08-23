@@ -1,0 +1,24 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: logging-cloudwatch
+  namespace: argocd
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: logging
+  sources:
+    - repoURL: https://aws.github.io/eks-charts
+      chart: aws-for-fluent-bit
+      targetRevision: 0.1.28
+      helm:
+        valueFiles:
+          - $values/logging/values.yaml
+    - repoURL: https://github.com/cmamith/gitops-apps
+      targetRevision: main
+      ref: values
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
