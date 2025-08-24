@@ -21,10 +21,11 @@ spec:
             eks.amazonaws.com/role-arn: arn:aws:iam::177206615793:role/eks-fluentbit-cloudwatch
 
         namespaceOverride: logging
+
         daemonSet:
           enabled: true
 
-        # Collect all container logs
+        # Input: tail container logs
         input:
           tail:
             enabled: true
@@ -35,7 +36,7 @@ spec:
             refreshInterval: 5
             readFromHead: Off
 
-        # Enrich with k8s metadata
+        # Enrich with Kubernetes metadata
         filters:
           kubernetes:
             enabled: true
@@ -44,45 +45,32 @@ spec:
             mergeLog: On
             keepLog: Off
 
-        # Ship to CloudWatch (SG)
+        # Disable built-in CloudWatch output (we'll use cloudwatch_logs with templating)
         cloudWatch:
-          enabled: true
-          region: ap-southeast-1
-          logGroupName: /eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['svc']}-${kubernetes['container_name']}
-          logStreamPrefix: ${kubernetes['pod_name']}/
-          autoCreateGroup: true
-          logRetentionDays: 14
+          enabled: false
 
+        # Add a replacement OUTPUT using cloudwatch_logs with a template
+        extraOutputs: |
+          [OUTPUT]
+              Name                    cloudwatch_logs
+              Match                   *
+              region                  ap-southeast-1
+              # Use the known-good keys:
+              #   kubernetes['namespace_name'], kubernetes['labels']['app'], kubernetes['container_name'], kubernetes['pod_name']
+              log_group_template      /eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['app']}-${kubernetes['container_name']}
+              default_log_group_name  /eks/3tier/fallback
+              log_stream_template     ${kubernetes['pod_name']}.${kubernetes['container_name']}
+              auto_create_group       true
 
-        # Keep resource needs tiny to help scheduling
+        # Small footprint + tolerations
         resources:
           requests: { cpu: 25m, memory: 96Mi }
           limits:   { cpu: 150m, memory: 192Mi }
 
-        # Tolerate any taints so it can land anywhere
         tolerations:
           - operator: Exists
+
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-
-  # disable the chart’s built-in CW output (it uses log_group_name)
-  cloudWatch:
-    enabled: false
-
-  # add our own cloudwatch_logs output with dynamic templating
-  extraOutputs: |
-    [OUTPUT]
-        Name                    cloudwatch_logs
-        Match                   *
-        region                  ap-southeast-1
-        # ✅ stable metadata keys from the kubernetes filter:
-        #    - namespace_name
-        #    - labels.app   (we added `app: ...` labels on your Deployments)
-        #    - container_name, pod_name
-        log_group_template      /eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['app']}-${kubernetes['container_name']}
-        default_log_group_name  /eks/3tier/fallback
-        log_stream_template     ${kubernetes['pod_name']}.${kubernetes['container_name']}
-        auto_create_group       true
-
