@@ -50,17 +50,17 @@ spec:
           enabled: false
 
         # Add a replacement OUTPUT using cloudwatch_logs with a template
-        extraOutputs: |
+         extraOutputs: |
           [OUTPUT]
               Name                    cloudwatch_logs
               Match                   *
               region                  ap-southeast-1
-              # Use the known-good keys:
-              #   kubernetes['namespace_name'], kubernetes['labels']['app'], kubernetes['container_name'], kubernetes['pod_name']
               log_group_template      /eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['app']}-${kubernetes['container_name']}
               default_log_group_name  /eks/3tier/fallback
               log_stream_template     ${kubernetes['pod_name']}.${kubernetes['container_name']}
               auto_create_group       true
+
+       
 
         # Small footprint + tolerations
         resources:
