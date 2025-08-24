@@ -21,36 +21,38 @@ spec:
             eks.amazonaws.com/role-arn: arn:aws:iam::177206615793:role/eks-fluentbit-cloudwatch
 
         namespaceOverride: logging
-
         daemonSet:
           enabled: true
 
-        # Input: tail container logs
-        input:
-          tail:
-            enabled: true
-            path: /var/log/containers/*.log
-            parser: docker
-            memBufLimit: 10MB
-            skipLongLines: On
-            refreshInterval: 5
-            readFromHead: Off
+        # >>> Take full control of config
+        customConfig: true
+        config: |
+          [SERVICE]
+              HTTP_Server  On
+              HTTP_Listen  0.0.0.0
+              HTTP_Port    2020
+              Parsers_File /fluent-bit/parsers/parsers.conf
 
-        # Enrich with Kubernetes metadata
-        filters:
-          kubernetes:
-            enabled: true
-            match: "*"
-            kubeURL: https://kubernetes.default.svc
-            mergeLog: On
-            keepLog: Off
+          [INPUT]
+              Name              tail
+              Tag               kube.*
+              Path              /var/log/containers/*.log
+              DB                /var/log/flb_kube.db
+              Parser            docker
+              Docker_Mode       On
+              Mem_Buf_Limit     10MB
+              Skip_Long_Lines   On
+              Refresh_Interval  5
 
-        # Disable built-in CloudWatch output (we'll use cloudwatch_logs with templating)
-        cloudWatch:
-          enabled: false
+          [FILTER]
+              Name                kubernetes
+              Match               kube.*
+              Kube_URL            https://kubernetes.default.svc
+              Merge_Log           On
+              Keep_Log            Off
+              Buffer_Size         32k
 
-        # Add a replacement OUTPUT using cloudwatch_logs with a template
-         extraOutputs: |
+          # Single CloudWatch output with correct region + templating
           [OUTPUT]
               Name                    cloudwatch_logs
               Match                   *
@@ -60,16 +62,12 @@ spec:
               log_stream_template     ${kubernetes['pod_name']}.${kubernetes['container_name']}
               auto_create_group       true
 
-       
-
-        # Small footprint + tolerations
         resources:
           requests: { cpu: 25m, memory: 96Mi }
           limits:   { cpu: 150m, memory: 192Mi }
 
         tolerations:
           - operator: Exists
-
   syncPolicy:
     automated:
       prune: true
