@@ -20,6 +20,12 @@ spec:
           annotations:
             eks.amazonaws.com/role-arn: arn:aws:iam::177206615793:role/eks-fluentbit-cloudwatch
 
+        cloudWatch:
+          enabled: false            # disable the legacy CloudWatch output (not strictly needed)
+        cloudWatchLogs:
+          enabled: false            # <-- this is the one that disables the us-east-1 default block
+
+
         namespaceOverride: logging
         daemonSet:
           enabled: true
