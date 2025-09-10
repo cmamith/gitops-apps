@@ -59,7 +59,6 @@ namespaceOverride: logging
 daemonSet:
   enabled: true
 
-# Input: tail container logs
 input:
   tail:
     enabled: true
@@ -70,7 +69,6 @@ input:
     refreshInterval: 5
     readFromHead: Off
 
-# Enrich with Kubernetes metadata
 filters:
   kubernetes:
     enabled: true
@@ -79,22 +77,19 @@ filters:
     mergeLog: On
     keepLog: Off
 
-# Disable built-in outputs to avoid us-east-1 defaults
+# Disable the legacy plugin block
 cloudWatch:
   enabled: false
-cloudWatchLogs:
-  enabled: false
 
-# Our OUTPUT using cloudwatch_logs + template (correct region + keys)
-extraOutputs: |
-  [OUTPUT]
-      Name                    cloudwatch_logs
-      Match                   *
-      region                  ap-southeast-1
-      log_group_template      /eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['app']}-${kubernetes['container_name']}
-      default_log_group_name  /eks/3tier/fallback
-      log_stream_template     ${kubernetes['pod_name']}.${kubernetes['container_name']}
-      auto_create_group       true
+# ✅ Use the modern CloudWatch Logs plugin *via chart values*
+cloudWatchLogs:
+  enabled: true
+  region: ap-southeast-1
+  # Fallback name is still required; template overrides it at runtime
+  logGroupName: "/eks/3tier/fallback"
+  logGroupTemplate: "/eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['app']}-${kubernetes['container_name']}"
+  logStreamTemplate: "${kubernetes['pod_name']}.${kubernetes['container_name']}"
+  autoCreateGroup: true
 
 resources:
   requests: { cpu: 25m, memory: 96Mi }
