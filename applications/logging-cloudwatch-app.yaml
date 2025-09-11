@@ -31,7 +31,7 @@ spec:
           enabled: true
           region: ap-southeast-1
           logGroupName: /eks/3tier/fallback   # use the template below
-          logGroupTemplate: /eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['svc']}-${kubernetes['container_name']}
+          logGroupTemplate: /eks/3tier/$kubernetes['namespace_name']/$kubernetes['labels']['svc']-$kubernetes['container_name']
           logStreamTemplate: ${kubernetes['pod_name']}.${kubernetes['container_name']}
           autoCreateGroup: true
           logRetentionDays: 14
