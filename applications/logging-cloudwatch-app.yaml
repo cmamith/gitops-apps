@@ -27,18 +27,18 @@ spec:
         # Use chart-managed CloudWatch Logs output
         cloudWatch:
           enabled: false
+
         cloudWatchLogs:
           enabled: true
           region: ap-southeast-1
-          logGroupName: ""   # keep empty to enable templating
+          # give a real fallback so Helm doesn’t render a blank line
+          logGroupName: /eks/3tier/fallback
+          # use record accessor syntax WITHOUT ${...}
           logGroupTemplate: /eks/3tier/$kubernetes['namespace_name']/$kubernetes['labels']['svc']-$kubernetes['container_name']
-          # optional safety net (only if your chart version supports it):
-          # default_log_group_name: /eks/3tier/fallback
           logStreamTemplate: $kubernetes['pod_name'].$kubernetes['container_name']
           autoCreateGroup: true
           logRetentionDays: 14
 
-        # Inputs / filters by the chart
         filters:
           kubernetes:
             enabled: true
@@ -50,6 +50,7 @@ spec:
             enabled: true
             path: /var/log/containers/*.log
             parser: docker
+
 
         resources:
           requests: { cpu: 25m, memory: 96Mi }
