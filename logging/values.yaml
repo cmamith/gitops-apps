@@ -52,6 +52,7 @@ serviceAccount:
   create: true
   name: fluent-bit
   annotations:
+    # your IRSA role ARN
     eks.amazonaws.com/role-arn: arn:aws:iam::177206615793:role/eks-fluentbit-cloudwatch
 
 namespaceOverride: logging
@@ -64,32 +65,38 @@ input:
     enabled: true
     path: /var/log/containers/*.log
     parser: docker
-    memBufLimit: 10MB
-    skipLongLines: On
-    refreshInterval: 5
-    readFromHead: Off
 
 filters:
   kubernetes:
     enabled: true
     match: "*"
     kubeURL: https://kubernetes.default.svc
-    mergeLog: On
-    keepLog: Off
 
-# Disable the legacy plugin block
+sources:
+  - repoURL: https://aws.github.io/eks-charts
+    chart: aws-for-fluent-bit
+    targetRevision: "0.1.28"
+    helm:
+      valueFiles:
+        - "$values/logging/values.yaml"
+  - repoURL: https://github.com/cmamith/gitops-apps
+    targetRevision: main
+    ref: values
+
+# Disable old CloudWatch output block
 cloudWatch:
   enabled: false
 
-# ✅ Use the modern CloudWatch Logs plugin *via chart values*
+# Use CloudWatch Logs with per-service group naming
 cloudWatchLogs:
   enabled: true
   region: ap-southeast-1
-  # Fallback name is still required; template overrides it at runtime
-  logGroupName: "/eks/3tier/fallback"
-  logGroupTemplate: "/eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['app']}-${kubernetes['container_name']}"
-  logStreamTemplate: "${kubernetes['pod_name']}.${kubernetes['container_name']}"
+  logGroupName: ""   # keep empty so template is used
+  # ✅ correct variable syntax (no curly braces)
+  logGroupTemplate: "/eks/3tier/$kubernetes['namespace_name']/$kubernetes['labels']['svc']-$kubernetes['container_name']"
+  logStreamTemplate: "$kubernetes['pod_name'].$kubernetes['container_name']"
   autoCreateGroup: true
+  logRetentionDays: 14
 
 resources:
   requests: { cpu: 25m, memory: 96Mi }

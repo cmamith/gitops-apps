@@ -20,53 +20,34 @@ spec:
           annotations:
             eks.amazonaws.com/role-arn: arn:aws:iam::177206615793:role/eks-fluentbit-cloudwatch
 
-        cloudWatch:
-          enabled: false            # disable the legacy CloudWatch output (not strictly needed)
-        cloudWatchLogs:
-          enabled: false            # <-- this is the one that disables the us-east-1 default block
-
-
         namespaceOverride: logging
         daemonSet:
           enabled: true
 
-        # >>> Take full control of config
-        customConfig: true
-        config: |
-          [SERVICE]
-              HTTP_Server  On
-              HTTP_Listen  0.0.0.0
-              HTTP_Port    2020
-              Parsers_File /fluent-bit/parsers/parsers.conf
+        # Use chart-managed CloudWatch Logs output
+        cloudWatch:
+          enabled: false
+        cloudWatchLogs:
+          enabled: true
+          region: ap-southeast-1
+          logGroupName: ""   # use the template below
+          logGroupTemplate: /eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['svc']}-${kubernetes['container_name']}
+          logStreamTemplate: ${kubernetes['pod_name']}.${kubernetes['container_name']}
+          autoCreateGroup: true
+          logRetentionDays: 14
 
-          [INPUT]
-              Name              tail
-              Tag               kube.*
-              Path              /var/log/containers/*.log
-              DB                /var/log/flb_kube.db
-              Parser            docker
-              Docker_Mode       On
-              Mem_Buf_Limit     10MB
-              Skip_Long_Lines   On
-              Refresh_Interval  5
+        # Inputs / filters by the chart
+        filters:
+          kubernetes:
+            enabled: true
+            match: "*"
+            kubeURL: https://kubernetes.default.svc
 
-          [FILTER]
-              Name                kubernetes
-              Match               kube.*
-              Kube_URL            https://kubernetes.default.svc
-              Merge_Log           On
-              Keep_Log            Off
-              Buffer_Size         32k
-
-          # Single CloudWatch output with correct region + templating
-          [OUTPUT]
-              Name                    cloudwatch_logs
-              Match                   *
-              region                  ap-southeast-1
-              log_group_template      /eks/3tier/${kubernetes['namespace_name']}/${kubernetes['labels']['app']}-${kubernetes['container_name']}
-              default_log_group_name  /eks/3tier/fallback
-              log_stream_template     ${kubernetes['pod_name']}.${kubernetes['container_name']}
-              auto_create_group       true
+        input:
+          tail:
+            enabled: true
+            path: /var/log/containers/*.log
+            parser: docker
 
         resources:
           requests: { cpu: 25m, memory: 96Mi }
