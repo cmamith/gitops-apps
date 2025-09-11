@@ -31,11 +31,11 @@ spec:
         cloudWatchLogs:
           enabled: true
           region: ap-southeast-1
-          # give a real fallback so Helm doesn’t render a blank line
-          logGroupName: /eks/3tier/fallback
-          # use record accessor syntax WITHOUT ${...}
-          logGroupTemplate: /eks/3tier/$kubernetes['namespace_name']/$kubernetes['labels']['svc']-$kubernetes['container_name']
-          logStreamTemplate: $kubernetes['pod_name'].$kubernetes['container_name']
+          logGroupName: /eks/3tier/fallback            # safety net
+          # IMPORTANT: only one $kubernetes[...] in this template + a static prefix
+          logGroupTemplate: /eks/3tier/$kubernetes['namespace_name']
+          # Put the detailed parts into the stream template
+          logStreamTemplate: $kubernetes['labels']['svc'].$kubernetes['container_name'].$kubernetes['pod_name']
           autoCreateGroup: true
           logRetentionDays: 14
 
