@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: confluence
+  namespace: argocd
+spec:
+  project: default
+  sources:
+    - repoURL: https://atlassian.github.io/data-center-helm-charts
+      chart: confluence
+      targetRevision: 1.19.0
+    - repoURL: https://github.com/cmamith/gitops-apps.git
+      targetRevision: HEAD
+      ref: values
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev-tools
+  syncPolicy: { automated: { prune: true, selfHeal: true } }
+  helm:
+    valueFiles:
+      - $values/dev-tools/confluence/values.yaml

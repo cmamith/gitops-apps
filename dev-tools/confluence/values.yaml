@@ -1,0 +1,14 @@
+confluence:
+  ingress:
+    enabled: true
+    className: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      alb.ingress.kubernetes.io/group.name: dev-tools
+    hosts: [confluence.<YOUR_DOMAIN>]
+  volumeClaimTemplate:
+    storageClassName: gp3
+    resources:
+      requests: { storage: 20Gi }
+

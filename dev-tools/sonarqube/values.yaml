@@ -1,0 +1,18 @@
+ingress:
+  enabled: true
+  ingressClassName: alb
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/group.name: dev-tools
+  hosts:
+    - name: sonarqube.<YOUR_DOMAIN>
+      path: /
+persistence:
+  enabled: true
+  size: 20Gi
+postgresql:
+  enabled: true
+  primary:
+    persistence:
+      size: 10Gi
