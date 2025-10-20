@@ -1,16 +1,17 @@
 controller:
-  admin:
-    existingSecret: jenkins-admin
-    userKey: username
-    passwordKey: password
   ingress:
     enabled: true
-    ingressClassName: alb
+    className: alb
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: ip
       alb.ingress.kubernetes.io/group.name: dev-tools
-    hostName: jenkins.<YOUR_DOMAIN>
-persistence:
-  enabled: true
-  size: 20Gi
+    #   alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    #   alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:428146723690:certificate/<YOUR_ACM_CERT_ARN>
+    # # hosts:
+    #   - jenkins.devtools.<YOUR_DOMAIN>
+    # tls:
+    #   - secretName: jenkins-tls
+    #     hosts:
+    #       - jenkins.devtools.<YOUR_DOMAIN>
+
