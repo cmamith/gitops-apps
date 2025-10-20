@@ -15,40 +15,60 @@
 #     #     hosts:
 #     #       - jenkins.devtools.<YOUR_DOMAIN>
 
+# controller:
+#   installPlugins:
+#     - configuration-as-code:1932.v75cb_b_f1b_698d
+#     - git:5.5.2
+#     - git-client:6.1.5
+#     - kubernetes:4309.vb_5f6da_93b_2b_a_
+
+#   # --- Service configuration for Minikube ---
+#   serviceType: NodePort
+#   servicePort: 8080
+#   targetPort: 8080
+
+#   # --- Admin credentials (optional if using external secret) ---
+#   admin:
+#     existingSecret: ""
+#     user: admin
+#     password: admin123
+
+#   # --- Ingress for local testing ---
+#   ingress:
+#     enabled: true
+#     className: nginx
+#     annotations:
+#       kubernetes.io/ingress.class: nginx
+#     hosts:
+#       - host: jenkins.local
+#         paths:
+#           - path: /
+#             pathType: Prefix
+
+#   # --- Persistence (to retain data between restarts) ---
+#   persistence:
+#     enabled: true
+#     size: 8Gi
+#     storageClass: standard
+
+
+place your dev-tools/jenkins/values.yaml with this working version:
+
 controller:
-  # --- Plugin fixes to prevent dependency errors ---
-  installPlugins:
-    - configuration-as-code:1932.v75cb_b_f1b_698d
-    - git:5.5.2
-    - git-client:6.1.5
-
-  # --- Service configuration for Minikube ---
-  serviceType: NodePort
-  servicePort: 8080
-  targetPort: 8080
-
-  # --- Admin credentials (optional if using external secret) ---
   admin:
-    existingSecret: ""
     user: admin
     password: admin123
+  serviceType: NodePort
+  servicePort: 8080
+  installPlugins:
+    - git:5.5.2
+    - git-client:6.1.5
+    - workflow-aggregator:590.v6a_d052e5a_a_b_5
+    - job-dsl:1.87
+    - configuration-as-code:1932.v75cb_b_f1b_698d
+  JCasC:
+    defaultConfig: false
 
-  # --- Ingress for local testing ---
-  ingress:
-    enabled: true
-    className: nginx
-    annotations:
-      kubernetes.io/ingress.class: nginx
-    hosts:
-      - host: jenkins.local
-        paths:
-          - path: /
-            pathType: Prefix
-
-  # --- Persistence (to retain data between restarts) ---
-  persistence:
-    enabled: true
-    size: 8Gi
-    storageClass: standard
-
-
+persistence:
+  enabled: true
+  size: 8Gi
