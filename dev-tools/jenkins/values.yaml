@@ -1,17 +1,54 @@
+# controller:
+#   ingress:
+#     enabled: true
+#     className: alb
+#     annotations:
+#       alb.ingress.kubernetes.io/scheme: internet-facing
+#       alb.ingress.kubernetes.io/target-type: ip
+#       alb.ingress.kubernetes.io/group.name: dev-tools
+#     #   alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+#     #   alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:428146723690:certificate/<YOUR_ACM_CERT_ARN>
+#     # # hosts:
+#     #   - jenkins.devtools.<YOUR_DOMAIN>
+#     # tls:
+#     #   - secretName: jenkins-tls
+#     #     hosts:
+#     #       - jenkins.devtools.<YOUR_DOMAIN>
+
 controller:
+  # --- Plugin fixes to prevent dependency errors ---
+  installPlugins:
+    - configuration-as-code:1932.v75cb_b_f1b_698d
+    - git:5.5.2
+    - git-client:6.1.5
+
+  # --- Service configuration for Minikube ---
+  serviceType: NodePort
+  servicePort: 8080
+  targetPort: 8080
+
+  # --- Admin credentials (optional if using external secret) ---
+  admin:
+    existingSecret: ""
+    user: admin
+    password: admin123
+
+  # --- Ingress for local testing ---
   ingress:
     enabled: true
-    className: alb
+    className: nginx
     annotations:
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      alb.ingress.kubernetes.io/group.name: dev-tools
-    #   alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
-    #   alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:428146723690:certificate/<YOUR_ACM_CERT_ARN>
-    # # hosts:
-    #   - jenkins.devtools.<YOUR_DOMAIN>
-    # tls:
-    #   - secretName: jenkins-tls
-    #     hosts:
-    #       - jenkins.devtools.<YOUR_DOMAIN>
+      kubernetes.io/ingress.class: nginx
+    hosts:
+      - host: jenkins.local
+        paths:
+          - path: /
+            pathType: Prefix
+
+  # --- Persistence (to retain data between restarts) ---
+  persistence:
+    enabled: true
+    size: 8Gi
+    storageClass: standard
+
 
