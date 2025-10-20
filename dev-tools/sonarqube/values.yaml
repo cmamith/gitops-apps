@@ -1,18 +1,40 @@
-ingress:
+# ingress:
+#   enabled: true
+#   ingressClassName: alb
+#   annotations:
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/target-type: ip
+#     alb.ingress.kubernetes.io/group.name: dev-tools
+# #   hosts:
+# #     - name: sonarqube.<YOUR_DOMAIN>
+# #       path: /
+# # persistence:
+# #   enabled: true
+# #   size: 20Gi
+# # postgresql:
+# #   enabled: true
+# #   primary:
+# #     persistence:
+# #       size: 10Gi
+
+image:
+  tag: 10.6.0-community
+
+service:
+  type: NodePort
+  nodePort: 32000
+  port: 9000
+
+postgresql:
   enabled: true
-  ingressClassName: alb
-  annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/group.name: dev-tools
-#   hosts:
-#     - name: sonarqube.<YOUR_DOMAIN>
-#       path: /
-# persistence:
-#   enabled: true
-#   size: 20Gi
-# postgresql:
-#   enabled: true
-#   primary:
-#     persistence:
-#       size: 10Gi
+  auth:
+    username: sonar
+    password: sonar123
+    database: sonarqube
+
+account:
+  adminPassword: admin123
+
+persistence:
+  enabled: true
+  size: 5Gi
