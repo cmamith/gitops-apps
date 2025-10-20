@@ -9,13 +9,17 @@ spec:
     - repoURL: https://charts.jenkins.io
       chart: jenkins
       targetRevision: 5.7.10
+      helm:
+        valueFiles:
+          - $values/dev-tools/jenkins/values.yaml
     - repoURL: https://github.com/cmamith/gitops-apps.git
       targetRevision: HEAD
       ref: values
   destination:
     server: https://kubernetes.default.svc
     namespace: dev-tools
-  syncPolicy: { automated: { prune: true, selfHeal: true } }
-  helm:
-    valueFiles:
-      - $values/dev-tools/jenkins/values.yaml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+

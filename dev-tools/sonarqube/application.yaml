@@ -20,17 +20,45 @@
 #     valueFiles:
 #       - $values/dev-tools/sonarqube/values.yaml
 
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: sonarqube
+#   namespace: argocd
+# spec:
+#   project: default
+#   sources:
+#     - repoURL: https://SonarSource.github.io/helm-chart-sonarqube
+#       chart: sonarqube
+#       targetRevision: 10.6.1
+#     - repoURL: https://github.com/cmamith/gitops-apps.git
+#       targetRevision: HEAD
+#       ref: values
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: dev-tools
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#   helm:
+#     valueFiles:
+#       - $values/dev-tools/sonarqube/values.yaml
+
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sonarqube
+  name: jenkins
   namespace: argocd
 spec:
   project: default
   sources:
-    - repoURL: https://SonarSource.github.io/helm-chart-sonarqube
+    - repoURL:  https://SonarSource.github.io/helm-chart-sonarqube
       chart: sonarqube
       targetRevision: 10.6.1
+      helm:
+        valueFiles:
+          - $values/dev-tools/sonarqube/values.yaml
     - repoURL: https://github.com/cmamith/gitops-apps.git
       targetRevision: HEAD
       ref: values
@@ -41,6 +69,3 @@ spec:
     automated:
       prune: true
       selfHeal: true
-  helm:
-    valueFiles:
-      - $values/dev-tools/sonarqube/values.yaml
